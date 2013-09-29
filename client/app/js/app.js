@@ -135,7 +135,10 @@ $(function() {
 				
                 return false;
             });
-
+			
+			$('#del-btn').click(function() {
+				console.log("code delete this thesis object");
+            });
         },
 		saveEditedThesis: function(response) {
 			var thesisObject = {Id: editingId};
@@ -181,7 +184,7 @@ $(function() {
             var self = this;
 			$.post('/api/thesis', object);
 			
-			self.showMessage("Saved", 1500);
+			self.showMessage("Saved", 1000);
 			
 			var $el = $('.menu-create').closest('.item');
 
@@ -206,6 +209,7 @@ $(function() {
         return markup;
 
     }
+	
     app.init();
 
 });
