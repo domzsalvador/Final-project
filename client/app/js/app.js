@@ -1,7 +1,6 @@
-var app = {};
-
 $(function() {
-	app = {
+
+    var app = {
         init: function() {
             this.user = {};
             $('.menu-crud').addClass('hidden');
@@ -13,9 +12,13 @@ $(function() {
             $('.btn-login').attr('href', '/api/login?url=/');
             $('.btn-logout').attr('href','/api/logout?url=/');
 
+            this.router = new Router();
             this.setEventListeners();
             this.getUser();
+
+            Backbone.history.start({pushState: true});
         },
+
         setEventListeners: function() {
             var self = this;
             $('.menu-crud .item a').click(function(ev) {
@@ -25,14 +28,21 @@ $(function() {
                 $el.addClass("active");
 
                 if ($el.hasClass('menu-list')) {
-                    self.showList();
+                    self.router.navigate('list', {trigger: true});
                 }
 
                 if ($el.hasClass('menu-create')) {
-                    self.showForm();
+                    self.router.navigate('new', {trigger: true});
                 }
             });
+
+            $('.navbar-brand').click(function() {
+                self.router.navigate('', {trigger: true});
+				$('.menu-create').removeClass('active');
+				$('.menu-list').removeClass('active');
+            });
         },
+
         getUser: function() {
             var self = this;
             $.ajax({
@@ -63,6 +73,9 @@ $(function() {
            $('.btn-login').addClass('hidden');
            $('.menu-user').removeClass('hidden');
         },
+        showHome: function() {
+            $('.app-content').html('');
+        },
         showList: function() {
             var $listTemplate = getTemplate('tpl-thesis-list');
             $('.app-content').html($listTemplate);
@@ -72,104 +85,22 @@ $(function() {
             if (!object) {
                 object = {};
             }
-			
             var self = this;
             var $formTemplate = getTemplate('tpl-thesis-form', object);
             $('.app-content').html($formTemplate);
-			
-			$('#enter').text('Save');
+
+
             $('form').unbind('submit').submit(function(ev) {
-				$.ajax({
-					method: 'GET',
-					url: '/api/thesis',
-					success: self.saveThesis
-				});
-				
+                var thesisObject = {};
+                var inputs = $('form').serializeArray();
+                for (var i = 0; i < inputs.length; i++) {
+                    thesisObject[inputs[i].name] = inputs[i].value;
+                }
+                self.save(thesisObject);
                 return false;
             });
 
         },
-		saveThesis: function(response) {
-			var thesisObject = {};
-			var inputs = $('form').serializeArray();
-			for (var i = 0; i < inputs.length; i++) {
-				thesisObject[inputs[i].name] = inputs[i].value;
-			}
-			
-			if (thesisObject.Title.length != 0){
-				var sameThesis = false;
-				
-				for (var i = 0; i < response.length; i++){
-					if (thesisObject.Title == response[i].Title){
-						sameThesis = true;
-						break;
-					}
-				}
-				
-				if (sameThesis){
-					app.showMessage("Same title", 1000);
-				}else{
-					app.save(thesisObject);
-				}
-			}else{
-				app.showMessage("Blank title", 1000);
-			}
-		},
-		showEditForm: function(object) {
-            if (!object) {
-                object = {};
-            }
-			
-            var self = this;
-            var $formTemplate = getTemplate('tpl-thesis-form', object);
-            $('.app-content').html($formTemplate);
-			
-			$('#enter').text('Update');
-
-            $('form').unbind('submit').submit(function(ev) {
-				$.ajax({
-					method: 'GET',
-					url: '/api/thesis',
-					success: self.saveEditedThesis
-				});
-				
-                return false;
-            });
-			
-			$('#del-btn').click(function() {
-				console.log("code delete this thesis object");
-            });
-        },
-		saveEditedThesis: function(response) {
-			var thesisObject = {Id: editingId};
-			var inputs = $('form').serializeArray();
-			for (var i = 0; i < inputs.length; i++) {
-				thesisObject[inputs[i].name] = inputs[i].value;
-			}
-			
-			if (thesisObject.Title.length != 0){
-				var sameThesis = false;
-				
-				for (var i = 0; i < response.length; i++){
-					console.log();
-					if (thesisObject.Title == response[i].Title && (thesisObject.Id != response[i].Id)){
-						sameThesis = true;
-						break;
-					}
-				}
-				
-				if (sameThesis){
-					app.showMessage("Same title", 1000);
-				}else{
-					$.post('/api/thesis', thesisObject);
-					
-					app.showMessage("Updated", 1000);
-					app.showEditForm(thesisObject);
-				}
-			}else{
-				app.showMessage("Blank title", 1000);
-			}
-		},
         loadAllThesis: function() {
             $.get('/api/thesis', this.displayLoadedList);
         },
@@ -183,22 +114,9 @@ $(function() {
         save: function(object) {
             var self = this;
 			$.post('/api/thesis', object);
-			
-			self.showMessage("Saved", 1000);
-			
-			var $el = $('.menu-create').closest('.item');
+        }
 
-			$('.menu-crud .item').removeClass('active');
-			$el.addClass("active");
 
-			if ($el.hasClass('menu-create')) {
-				self.showForm();
-			}
-        },
-		showMessage: function(msg, time) {
-			$('.app-msg').html('<div id="msg"><hr><br>' + msg + '<br><hr><br><br></div>');
-			$('#msg').animate({margin: '-300px auto auto auto'}, time);
-		}
     };
 
     function getTemplate(template_id, context) {
@@ -209,25 +127,39 @@ $(function() {
         return markup;
 
     }
-	
+
+
+    var Router = Backbone.Router.extend({
+        routes: {
+            '': 'onHome',
+            'thesis-:id': 'onView',
+            'new': 'onCreate',
+            'edit': 'onEdit',
+            'list': 'onList'
+        },
+
+       onHome: function() {
+            app.showHome();
+       },
+
+       onView: function(id) {
+           console.log('thesis id', id);
+       },
+
+       onCreate: function() {
+            app.showForm();
+       },
+
+       onEdit: function() {
+
+       },
+
+       onList: function() {
+            app.showList();
+       }
+
+    });
     app.init();
 
-});
 
-	var editingId;
-	function editIt(id) {editingId = id;
-		var thesisObj = {};
-		$.ajax({
-			method: 'GET',
-			url: '/api/thesis/',
-			success: function (response) {
-				for (var i = 0; i < response.length; i++){
-					if (id == response[i].Id){
-						thesisObj = response[i];
-						app.showEditForm(thesisObj);
-						break;
-					}
-				}
-			}
-		});
-	}
+});

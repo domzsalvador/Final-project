@@ -5,10 +5,3 @@ body {
 .hidden {
     display: none;
 }
-
-#msg {
-	margin-left: 30%;
-	margin-top: 30%;
-	font-style: serif;
-	font-size: 30pt;
-}
