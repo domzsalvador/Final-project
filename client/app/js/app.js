@@ -91,12 +91,8 @@ $(function() {
 
 
             $('form').unbind('submit').submit(function(ev) {
-                var thesisObject = {};
-                var inputs = $('form').serializeArray();
-                for (var i = 0; i < inputs.length; i++) {
-                    thesisObject[inputs[i].name] = inputs[i].value;
-                }
-                self.save(thesisObject);
+				$.get('/api/thesis', self.save);
+				
                 return false;
             });
 
@@ -111,9 +107,34 @@ $(function() {
 				$('.thesis-list').append(getTemplate('tpl-thesis-list-item', list[i]));
 			}
         },
-        save: function(object) {
+        save: function(allThesis) {
             var self = this;
-			$.post('/api/thesis', object);
+			
+			var thesisObject = {};
+			var inputs = $('form').serializeArray();
+			for (var i = 0; i < inputs.length; i++) {
+				thesisObject[inputs[i].name] = inputs[i].value;
+			}
+			
+			if (thesisObject.Title.length != 0){
+				var sameThesis = false;
+				
+				for (var i = 0; i < allThesis.length; i++){
+					if (thesisObject.Title == allThesis[i].Title){
+						sameThesis = true;
+						break;
+					}
+				}
+				
+				if (sameThesis){
+					alert("Thesis with this title was already created.");
+				}else{
+					$.post('/api/thesis', thesisObject);
+					alert("Thesis \"" + thesisObject.Title + "\", saved.");
+				}
+			}else{
+				alert("Thesis title entry is blank.");
+			}
         }
 
 
