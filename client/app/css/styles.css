@@ -5,3 +5,7 @@ body {
 .hidden {
     display: none;
 }
+
+.fb-comments{
+	margin-left: 100px;
+}

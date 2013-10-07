@@ -8,6 +8,7 @@ $(function() {
             $('.menu-loading').removeClass('hidden');
             $('.menu-user').addClass('hidden');
             $('.btn-login').addClass('hidden');
+            $('.fb-comments').addClass('hidden');
 
             $('.btn-login').attr('href', '/api/login?url=/');
             $('.btn-logout').attr('href','/api/logout?url=/');
@@ -75,11 +76,13 @@ $(function() {
         },
         showHome: function() {
             $('.app-content').html('');
+            $('.fb-comments').addClass('hidden');
         },
         showList: function() {
             var $listTemplate = getTemplate('tpl-thesis-list');
             $('.app-content').html($listTemplate);
             this.loadAllThesis();
+            $('.fb-comments').addClass('hidden');
         },
         showForm: function(object) {
             if (!object) {
@@ -95,10 +98,11 @@ $(function() {
 				
                 return false;
             });
-
+            $('.fb-comments').addClass('hidden');
         },
 		showView: function(object) {
            $('.app-content').html(getTemplate('tpl-thesis-view-item', object));
+           $('.fb-comments').removeClass('hidden');
         },
         loadAllThesis: function() {
             $.get('/api/thesis', this.displayLoadedList);
