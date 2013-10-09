@@ -6,16 +6,8 @@
         <link rel="stylesheet" type="text/css" href="css/styles.css">
     </head>
     <body>
-        <div id="fb-root"></div>
-        <script>(function(d, s, id) {
-          var js, fjs = d.getElementsByTagName(s)[0];
-          if (d.getElementById(id)) return;
-          js = d.createElement(s); js.id = id;
-          js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=130478947138367";
-          fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'facebook-jssdk'));</script>
-
-        <div class="navbar navbar-inverse navbar-fixed-top">
+		<div id="fb-root"></div>
+		<div class="navbar navbar-inverse navbar-fixed-top">
             <div class="container">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -46,9 +38,7 @@
             </div>
             <div class='container'>
                 <div class='row app-content'>
-                </div>
-            </div>
-            <div class="fb-comments" data-href="http://pupcoetm-salvador-lopez.appspot.com/" data-colorscheme="light" data-numposts="5" data-width="600">
+				</div>
             </div>
         </div>
 
@@ -121,13 +111,15 @@
                 </form>
             </div>
         </script>
-		
+					
 		<script id="tpl-thesis-view-item" type="text/x-handlebars-template">
-            <h1>{{Title}} ({{Year}})</h1>
+			<h1>{{Title}} ({{Year}})</h1>
 			<h3>{{Subtitle}}</h3><br>
 			<p>{{Description}}</p>
+			
+			<div class="fb-comments" data-href="http://pupcoetm-salvador-lopez.appspot.com/thesis-{{Id}}" data-colorscheme="light" data-numposts="5" data-width="600">
+			</div>
         </script>
-
     </body>
 </html>
 
