@@ -101,6 +101,7 @@ $(function() {
 			if (typeof(FB) !== 'undefined') {
 				FB.XFBML.parse();
 			}else{
+                console.log(typeof(FB));
 				fb(document, 'script', 'facebook-jssdk');
 			}
         },
@@ -162,6 +163,44 @@ $(function() {
 
     }
 
+    function homeView(){
+        $('.sidebar-wrapper').addClass('navbar');          
+        $('.navbar').addClass('navbar-inverse');
+        $('.navbar').addClass('navbar-fixed-top');
+        $('.navbar').removeClass('sidebar-wrapper');
+        $('.container').removeClass('sidebar-nav')
+        $('.app-content').removeClass('wrapper');
+        $('.sidebar-brand').addClass('navbar-header');
+        $('.navbar-header').removeClass('sidebar-brand');
+        $('.menu-crud').addClass('nav');
+        $('.menu-crud').addClass('navbar-nav');
+        $('.panel-right').addClass('navbar-right');
+        $('.navbar-right').addClass('navbar-nav');
+        $('.navbar-right').addClass('nav');
+        $('.navbar-right').removeClass('panel-right');
+        $('.dropdown-menu').removeClass('dropdown-design');
+        $('body').css({'padding-top': '70px'});
+    }
+
+    function contentView(){
+        $('.navbar').addClass('sidebar-wrapper');          
+        $('.sidebar-wrapper').removeClass('navbar-inverse');
+        $('.sidebar-wrapper').removeClass('navbar-fixed-top');
+        $('.sidebar-wrapper').removeClass('navbar');
+        $('.container').addClass('sidebar-nav')
+        $('.app-content').addClass('wrapper');
+        $('.navbar-header').addClass('sidebar-brand');
+        $('.sidebar-brand').removeClass('navbar-header');
+        $('.menu-crud').removeClass('nav');
+        $('.menu-crud').removeClass('navbar-nav');
+        $('.navbar-right').addClass('panel-right');
+        $('.panel-right').removeClass('nav');
+        $('.panel-right').removeClass('navbar-nav');
+        $('.panel-right').removeClass('navbar-right');
+        $('.dropdown-menu').addClass('dropdown-design');
+        $('body').css({'padding-top': '0px'});
+
+    }
 
     var Router = Backbone.Router.extend({
         routes: {
@@ -173,15 +212,18 @@ $(function() {
         },
 
        onHome: function() {
+            homeView();
             app.showHome();
        },
 
        onView: function(id) {
-           console.log('thesis id', id);
-		   $.get('api/thesis/' + id, app.showView);
+            contentView();          
+            console.log('thesis id', id);
+		    $.get('api/thesis/' + id, app.showView);
        },
 
        onCreate: function() {
+            contentView();
             app.showForm();
        },
 
@@ -190,6 +232,7 @@ $(function() {
        },
 
        onList: function() {
+            contentView();
             app.showList();
        }
 

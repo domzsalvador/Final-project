@@ -3,6 +3,7 @@
     <head>
         <title>Project Title</title>
         <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="css/simple-sidebar.css">
         <link rel="stylesheet" type="text/css" href="css/styles.css">
     </head>
     <body>
@@ -15,9 +16,9 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="javascript:void(0)">Project Title</a>
+                    <a class="navbar-brand" href="javascript:void(0)">Thesis Manager</a>
                 </div>
-                <div class="collapse navbar-collapse">
+                <div>
                     <ul class="nav navbar-nav menu-crud">
                         <li class='menu-create item'><a href="javascript:void(0)">Create New</a></li>
                         <li class='menu-list item'><a href="javascript:void(0)">Show All</a></li>
@@ -36,8 +37,8 @@
                     </div>
                 </div>
             </div>
-            <div class='container'>
-                <div class='row app-content'>
+            <div class='content-container'>
+                <div class='app-content'>
 				</div>
             </div>
         </div>
@@ -113,12 +114,21 @@
         </script>
 					
 		<script id="tpl-thesis-view-item" type="text/x-handlebars-template">
-			<h1>{{Title}} ({{Year}})</h1>
-			<h3>{{Subtitle}}</h3><br>
-			<p>{{Description}}</p>
-			
-			<div class="fb-comments" data-href="http://pupcoetm-salvador-lopez.appspot.com/thesis-{{Id}}" data-colorscheme="light" data-numposts="5" data-width="600">
+			<div class = 'content-header'>
+                <h2>{{Title}} ({{Year}})</h2>
+            </div>
+
+            <div id = 'subtitle-header' class = 'col-md-12'>
+			    <h3>{{Subtitle}}</h3>
+            </div>
+
+            <div id = 'description-content' class = 'col-md-12'>
+			    <h5>{{Description}}</h5>
 			</div>
+            <div id = 'fb-box'>
+			    <div class="fb-comments" data-href="http://pupcoetm-salvador-lopez.appspot.com/thesis-{{Id}}" data-colorscheme="light" data-numposts="5" data-width="600">
+			    </div>
+            </div>
         </script>
     </body>
 </html>
