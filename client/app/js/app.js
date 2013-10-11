@@ -1,5 +1,7 @@
 $(function() {
-
+	var obj = {};
+	var editingId;
+	
     var app = {
         init: function() {
             this.user = {};
@@ -85,23 +87,28 @@ $(function() {
             if (!object) {
                 object = {};
             }
-            var self = this;
+			obj = object;
+			
             var $formTemplate = getTemplate('tpl-thesis-form', object);
             $('.app-content').html($formTemplate);
-
-
+			
             $('form').unbind('submit').submit(function(ev) {
-				$.get('/api/thesis', self.save);
-				
+				$.get('/api/thesis', app.save);
+								
                 return false;
             });
+			
+			$('#del-btn').click(function(){
+				alert("no delete code yet");
+				//ahtkZXZ-cHVwY29ldG0tc2FsdmFkb3ItbG9wZXpyEwsSBnRoZXNpcxiAgICAgMCvCQw
+				
+			});
         },
 		showView: function(object) {
 			$('.app-content').html(getTemplate('tpl-thesis-view-item', object));
 			if (typeof(FB) !== 'undefined') {
 				FB.XFBML.parse();
 			}else{
-                console.log(typeof(FB));
 				fb(document, 'script', 'facebook-jssdk');
 			}
         },
@@ -115,16 +122,31 @@ $(function() {
 				$('.thesis-list').append(getTemplate('tpl-thesis-list-item', list[i]));
 			}
 			
+			var linkClicked = false;
+			
+			$('.table tbody tr a').click(function (event) {
+				linkClicked = true;
+			});
+			
 			$('.table tbody tr').click(function (event) {
-				app.router.navigate('thesis-' + $(this).attr('data-id'), {trigger: true});
-				$('.menu-create').removeClass('active');
-				$('.menu-list').removeClass('active');
+				if (!linkClicked){
+					app.router.navigate('thesis-' + $(this).attr('data-id'), {trigger: true});
+					$('.menu-create').removeClass('active');
+					$('.menu-list').removeClass('active');
+				} else {
+					app.router.navigate('edit-' + $(this).attr('data-id'), {trigger: true});
+					linkClicked = false;
+					$('.menu-create').removeClass('active');
+					$('.menu-list').removeClass('active');
+				}
 			});
         },
         save: function(allThesis) {
-            var self = this;
-			
 			var thesisObject = {};
+			if ($('#save-btn').text() == "Update") {
+				thesisObject.Id = editingId;
+			}
+
 			var inputs = $('form').serializeArray();
 			for (var i = 0; i < inputs.length; i++) {
 				thesisObject[inputs[i].name] = inputs[i].value;
@@ -134,8 +156,14 @@ $(function() {
 				var sameThesis = false;
 				
 				for (var i = 0; i < allThesis.length; i++){
-					if (thesisObject.Title == allThesis[i].Title){
-						sameThesis = true;
+					if (thesisObject.Title == allThesis[i].Title) {
+						if ($('#save-btn').text() == "Update") {
+							if (thesisObject.Id != allThesis[i].Id) {
+								sameThesis = true;
+							}
+						} else {
+							sameThesis = true;
+						}
 						break;
 					}
 				}
@@ -144,14 +172,19 @@ $(function() {
 					alert("Thesis with this title was already created.");
 				}else{
 					$.post('/api/thesis', thesisObject);
-					alert("Thesis \"" + thesisObject.Title + "\", saved.");
+					if ($('#save-btn').text() == "Save") {
+						alert("Thesis \"" + thesisObject.Title + "\", saved.");
+					} else {
+						alert("Thesis updated.\n\n     Title: \"" + obj.Title + "\" => \"" + thesisObject.Title + 
+											"\"\n     Year: \"" + obj.Year + "\" => \"" + thesisObject.Year + 
+											"\"\n     Subtitle: \"" + obj.Subtitle + "\" => \"" + thesisObject.Subtitle + 
+											"\"\n     Description: \"" + obj.Description + "\" => \"" + thesisObject.Description + "\"");
+					}
 				}
 			}else{
 				alert("Thesis title entry is blank.");
 			}
         }
-
-
     };
 
     function getTemplate(template_id, context) {
@@ -207,7 +240,7 @@ $(function() {
             '': 'onHome',
             'thesis-:id': 'onView',
             'new': 'onCreate',
-            'edit': 'onEdit',
+            'edit-:id': 'onEdit',
             'list': 'onList'
         },
 
@@ -227,8 +260,10 @@ $(function() {
             app.showForm();
        },
 
-       onEdit: function() {
-
+       onEdit: function(id) {
+			contentView();
+			editingId = id;
+		    $.get('api/thesis/' + id, app.showForm);
        },
 
        onList: function() {
