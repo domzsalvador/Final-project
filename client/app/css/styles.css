@@ -25,9 +25,19 @@ li{
 h2, h3, h5{
 	margin: 30px;
 }
+
+.sidebar-wrapper{
+	background: #222222;
+}
+
+.active{
+	background: #000;
+}
+
 .btn{
 	padding: 6px 12px;
 }
+
 .dropdown-design{
 	background-color: #222222;
 
