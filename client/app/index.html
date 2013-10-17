@@ -19,6 +19,12 @@
                     <a class="navbar-brand" href="javascript:void(0)">Thesis Manager</a>
                 </div>
                 <div>
+                    <form class="navbar-form navbar-right form-search">
+                        <div class="form-group">
+                          <input type="text" class="form-control search-input" placeholder="Search">
+                        </div>
+                    </form>
+
                     <ul class="nav navbar-nav menu-crud">
                         <li class='menu-create item'><a href="javascript:void(0)">Create New</a></li>
                         <li class='menu-list item'><a href="javascript:void(0)">Show All</a></li>
@@ -34,11 +40,7 @@
                         </li>
                     </ul>
                     <a href='#' class="btn btn-primary btn-login navbar-btn navbar-right">Log in</a>
-					<form class="navbar-form navbar-right form-search">
-                        <div class="form-group">
-                          <input type="text" class="form-control search-input" placeholder="Search">
-                        </div>
-                    </form>
+					
 				</div>
 			</div>
 		</div>
@@ -80,7 +82,7 @@
                 <td>{{Year}}</td>
                 <td>{{Title}}</td>
 				{{#if User}}
-					<td><a href='javascript:void(0)' id="edit-link">Edit</a></td>
+					<td><a href='javascript:void(0)' id="edit-link" class = 'btn btn-primary'>Edit</a></td>
 				{{/if}}
             </tr>
         </script>
