@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>Project Title</title>
+        <title>SL Thesis Manager</title>
         <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
         <link rel="stylesheet" type="text/css" href="css/simple-sidebar.css">
         <link rel="stylesheet" type="text/css" href="css/styles.css">
@@ -29,19 +29,23 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class='user-email'></span> <b class="caret"></b></a>
                             <ul class="dropdown-menu">
                                 <li><a href="#" class='btn-logout'>Logout</a></li>
-                                <li ><a href="#">About</a></li>
+                                <li ><a href="#" id='about-link'>About</a></li>
                             </ul>
                         </li>
                     </ul>
                     <a href='#' class="btn btn-primary btn-login navbar-btn navbar-right">Log in</a>
-                    </div>
-                </div>
-            </div>
-            <div class='content-container'>
-                <div class='app-content'>
+					<form class="navbar-form navbar-right form-search">
+                        <div class="form-group">
+                          <input type="text" class="form-control search-input" placeholder="Search">
+                        </div>
+                    </form>
 				</div>
-            </div>
-        </div>
+			</div>
+		</div>
+		<div class='content-container'>
+			<div class='app-content'>
+			</div>
+		</div>
 
         <!-- scripts -->
         <!-- =================== -->
@@ -75,7 +79,9 @@
             <tr data-id="{{Id}}">
                 <td>{{Year}}</td>
                 <td>{{Title}}</td>
-                <td><a href='javascript:void(0)'>Edit</a></td>
+				{{#if User}}
+					<td><a href='javascript:void(0)' id="edit-link">Edit</a></td>
+				{{/if}}
             </tr>
         </script>
 
@@ -86,11 +92,11 @@
                     <div class="form-group">
                         <label for="year-input">Year</label>
                         <select id='year-input' name='Year' class="form-control">
-                          <option value='2013' {{#compare Year '2013'}}selected{{/compare}}>2013</option>
-                          <option value='2012' {{#compare Year '2012'}}selected{{/compare}}>2012</option>
-                          <option value='2011' {{#compare Year '2011'}}selected{{/compare}}>2011</option>
-                          <option value='2010' {{#compare Year '2010'}}selected{{/compare}}>2010</option>
-                          <option value='2009' {{#compare Year '2009'}}selected{{/compare}}>2009</option>
+                          <option value='2013'>2013</option>
+                          <option value='2012'>2012</option>
+                          <option value='2011'>2011</option>
+                          <option value='2010'>2010</option>
+                          <option value='2009'>2009</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -105,11 +111,11 @@
                         <label for="description-input">Description</label>
                         <textarea id='description-input' name='Description' class="form-control" rows="3">{{Description}}</textarea>
                     </div>
-                    
 					
                     {{#if Id}}
 					<button type="submit" id="save-btn" class="btn btn-primary">Update</button>
-                    <button type="button" id="del-btn" class="btn btn-default">Delete</button>
+					<button type="submit" id="del-btn" class="btn btn-primary">Delete</button>
+                    <button type="button" id="cancel-btn" class="btn btn-default">Cancel</button>
 					{{else}}
 					<button type="submit" id="save-btn" class="btn btn-primary">Save</button>
                     {{/if}}
@@ -118,6 +124,8 @@
         </script>
 					
 		<script id="tpl-thesis-view-item" type="text/x-handlebars-template">
+			<button type='button' id='back-btn' class='btn btn-primary'>Back</button>
+			
 			<div class = 'content-header'>
                 <h2>{{Title}} ({{Year}})</h2>
             </div>
@@ -127,7 +135,7 @@
             </div>
 
             <div id = 'description-content' class = 'col-md-12'>
-			    <h5>{{Description}}</h5>
+			    <h5>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{Description}}</h5>
 			</div>
             <div id = 'fb-box'>
 				<div class="fb fb-like" data-href="http://pupcoetm-salvador-lopez.appspot.com/thesis-{{Id}}" data-colorscheme="light" data-width="600" data-layout="standard" data-action="like" data-show-faces="true" data-send="false">

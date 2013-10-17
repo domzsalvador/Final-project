@@ -60,4 +60,10 @@ h2, h3, h5{
 
 #description-content{
 	border-bottom: 1px solid #e9e9e9;
+	text-align:justify;
+}
+
+#back-btn{
+	float:right;
+	margin-right:20px;
 }

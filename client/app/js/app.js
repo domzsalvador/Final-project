@@ -1,6 +1,9 @@
 $(function() {
+	var user = {};
 	var obj = {};
 	var editingId;
+	var searched = false;
+	var searchedList = [];
 	
     var app = {
         init: function() {
@@ -10,9 +13,12 @@ $(function() {
             $('.menu-loading').removeClass('hidden');
             $('.menu-user').addClass('hidden');
             $('.btn-login').addClass('hidden');
+			$('.search-input').addClass('hidden');
 
             $('.btn-login').attr('href', '/api/login?url=/');
             $('.btn-logout').attr('href','/api/logout?url=/');
+			$('#about-link').attr('href', 'http://domzsalvador.github.io/AdvancedWebComputing/Module-one/');
+			$('#about-link').attr('target', '_blank');
 
             this.router = new Router();
             this.setEventListeners();
@@ -24,6 +30,8 @@ $(function() {
         setEventListeners: function() {
             var self = this;
             $('.menu-crud .item a').click(function(ev) {
+				app.clearSearch();
+				
                 var $el = $(ev.target).closest('.item');
 
                 $('.menu-crud .item').removeClass('active');
@@ -39,11 +47,75 @@ $(function() {
             });
 
             $('.navbar-brand').click(function() {
+				app.clearSearch();
+				
                 self.router.navigate('', {trigger: true});
 				$('.menu-create').removeClass('active');
-				$('.menu-list').removeClass('active');
+				$('.menu-list').removeClass('active');	
+            });
+			
+			$('form').unbind('search-input').submit(function(ev){
+				searched = true;
+				$('.menu-create').removeClass('active');
+				$('.menu-list').removeClass('active');	
+				app.router.navigate('search', {trigger: true});
+				$('.thesis-list').html('');
+				
+				var keyword = $('.search-input').val();
+				if (keyword.length == ''){
+					app.loadAllThesis();
+				}else{
+					var thesisList = [];
+					var index = 0;
+					$.get('/api/thesis', function(response){
+						for (var i = 0; i < response.length; i++) {
+							var thesis = response[i];
+							var thesisTitle = response[i].Title;
+							if (thesisTitle.length >= keyword.length) {
+								for (var j = 0; j <= thesisTitle.length - keyword.length; j++){
+									if (thesisTitle.substring(j, j + keyword.length) == keyword) {
+										thesisList[index++] = thesis;
+										break;
+									}
+								}
+							}
+							
+							if ($.isNumeric(keyword)){
+								if (thesis.Year == keyword){
+									var sameThesis = false;
+									for (var j = 0; j < thesisList.length; j++) {
+										if (thesis.Title == thesisList[j].Title) {
+											sameThesis = true;
+											break;
+										}
+									}
+									if (!sameThesis){
+										thesisList[index++] = thesis;
+									}
+								}
+							}
+						}
+						searchedList = thesisList;
+							app.loadSearchedThesis(thesisList);
+						if (thesisList.length > 0){
+							
+						}else{
+							alert("No search result.");
+						}
+					});
+				}
+				return false;
             });
         },
+		
+		loadSearchedThesis: function(list) {
+			app.displayLoadedList(list);
+		},
+		
+		clearSearch: function() {
+			$('.search-input').val('');
+			searched = false;
+		},
 
         getUser: function() {
             var self = this;
@@ -51,8 +123,8 @@ $(function() {
                 method: 'GET',
                 url: '/api/users/me',
                 success: function(me) {
-                    // user is already signed in
                     console.log(me);
+					user = me;
                     self.user = me;
                     self.showLogout();
                 },
@@ -63,26 +135,32 @@ $(function() {
                 }
             });
         },
+		
         showLogin: function() {
            $('.menu-loading').addClass('hidden');
            $('.menu-user').addClass('hidden');
            $('.btn-login').removeClass('hidden');
+           $('.search-input').addClass('hidden');
         },
+		
         showLogout: function() {
            $('.menu-crud').removeClass('hidden');
            $('.user-email').text(this.user.email);
            $('.menu-loading').addClass('hidden');
            $('.btn-login').addClass('hidden');
            $('.menu-user').removeClass('hidden');
+           $('.search-input').removeClass('hidden');
         },
+		
         showHome: function() {
             $('.app-content').html('');
         },
+		
         showList: function() {
             var $listTemplate = getTemplate('tpl-thesis-list');
             $('.app-content').html($listTemplate);
-            this.loadAllThesis();
         },
+		
         showForm: function(object) {
             if (!object) {
                 object = {};
@@ -91,19 +169,26 @@ $(function() {
 			
             var $formTemplate = getTemplate('tpl-thesis-form', object);
             $('.app-content').html($formTemplate);
+			$("select option[value=" + object.Year +"]").attr("selected", "selected");
 			
-            $('form').unbind('submit').submit(function(ev) {
+            $('#save-btn').click(function(){
 				$.get('/api/thesis', app.save);
-								
-                return false;
-            });
+				return false;
+			});
 			
 			$('#del-btn').click(function(){
-				alert("no delete code yet");
-				//ahtkZXZ-cHVwY29ldG0tc2FsdmFkb3ItbG9wZXpyEwsSBnRoZXNpcxiAgICAgMCvCQw
-				
+				$('.menu-create').removeClass('active');
+				$('.menu-list').addClass('active');
+				app.deleteThesis(obj.Id);
+				return false;
+			});
+			
+			$('#cancel-btn').click(function(){
+				$('.menu-list').addClass('active');
+				app.router.navigate('list', {trigger: true});
 			});
         },
+		
 		showView: function(object) {
 			$('.app-content').html(getTemplate('tpl-thesis-view-item', object));
 			if (typeof(FB) !== 'undefined') {
@@ -111,36 +196,70 @@ $(function() {
 			}else{
 				fb(document, 'script', 'facebook-jssdk');
 			}
+			
+			$('#back-btn').click(function(){
+				$('.menu-list').addClass('active');
+				app.router.navigate('list', {trigger: true});
+			});
         },
+		
         loadAllThesis: function() {
             $.get('/api/thesis', this.displayLoadedList);
+            searched = false;
         },
+		
         displayLoadedList: function(list) {
-            console.log('response', list);
-            //  use tpl-thesis-list-item to render each loaded list and attach it
 			for (var i = 0; i < list.length; i++){
+				if (typeof(list[i].owners) !== 'undefined') {
+					for (var j = 0; j < list[i].owners.length; j++){
+						if (list[i].owners[j] == user.Id) {
+							list[i].User = "Author"
+							break;
+						}
+					}
+				}
 				$('.thesis-list').append(getTemplate('tpl-thesis-list-item', list[i]));
 			}
 			
-			var linkClicked = false;
+			var linkClicked = 0;
 			
-			$('.table tbody tr a').click(function (event) {
-				linkClicked = true;
+			$('.table tbody tr #edit-link').click(function (event) {
+				linkClicked = 1;
+			});
+			
+			$('.table tbody tr #del-link').click(function (event) {
+				linkClicked = 2;
 			});
 			
 			$('.table tbody tr').click(function (event) {
-				if (!linkClicked){
+				if (linkClicked == 0){
 					app.router.navigate('thesis-' + $(this).attr('data-id'), {trigger: true});
 					$('.menu-create').removeClass('active');
 					$('.menu-list').removeClass('active');
 				} else {
 					app.router.navigate('edit-' + $(this).attr('data-id'), {trigger: true});
-					linkClicked = false;
+					linkClicked = 0;
 					$('.menu-create').removeClass('active');
 					$('.menu-list').removeClass('active');
-				}
+				} //else {
+					//linkClicked = 0;
+					//$('.menu-create').removeClass('active');
+					//$('.menu-list').addClass('active');
+					//app.deleteThesis($(this).attr('data-id'));
+				//}
 			});
         },
+		
+		deleteThesis: function(id){
+			$.ajax({
+				type: 'DELETE',
+				url: '/api/thesis/' + id,
+				success: function(){
+					app.router.navigate('list', {trigger: true});
+				}
+			});
+		},
+		
         save: function(allThesis) {
 			var thesisObject = {};
 			if ($('#save-btn').text() == "Update") {
@@ -171,14 +290,54 @@ $(function() {
 				if (sameThesis){
 					alert("Thesis with this title was already created.");
 				}else{
-					$.post('/api/thesis', thesisObject);
-					if ($('#save-btn').text() == "Save") {
-						alert("Thesis \"" + thesisObject.Title + "\", saved.");
-					} else {
-						alert("Thesis updated.\n\n     Title: \"" + obj.Title + "\" => \"" + thesisObject.Title + 
-											"\"\n     Year: \"" + obj.Year + "\" => \"" + thesisObject.Year + 
-											"\"\n     Subtitle: \"" + obj.Subtitle + "\" => \"" + thesisObject.Subtitle + 
-											"\"\n     Description: \"" + obj.Description + "\" => \"" + thesisObject.Description + "\"");
+					if($.isNumeric(thesisObject.Title)){
+						alert("Invalid thesis title.");
+					}else{
+						$.post('/api/thesis', thesisObject);
+						if ($('#save-btn').text() == "Save") {
+							$('.menu-create').removeClass('active');
+							$('.menu-list').addClass('active');
+							alert("Thesis \"" + thesisObject.Title + "\", saved.");
+							app.router.navigate('list', {trigger: true});
+						} else {
+							var update = "";
+							if (obj.Title != thesisObject.Title){
+								update = "Thesis updated.\n\n     Title: \"" + obj.Title + "\" => \"" + thesisObject.Title + "\"\n";
+							}
+							
+							if (obj.Year != thesisObject.Year){
+								var thisUpdate = "     Year: \"" + obj.Year + "\" => \"" + thesisObject.Year + "\"\n";
+								if (update == ""){
+									update = "Thesis updated.\n\n" + thisUpdate;
+								}else{
+									update += thisUpdate;
+								}
+							}
+							
+							if ( obj.Subtitle != thesisObject.Subtitle){
+								var thisUpdate = "     Subtitle: \"" + obj.Subtitle + "\" => \"" + thesisObject.Subtitle + "\"\n";
+								if (update == ""){
+									update = "Thesis updated.\n\n" + thisUpdate;
+								}else{
+									update += thisUpdate;
+								}
+							}
+							
+							if ( obj.Description != thesisObject.Description){
+								var thisUpdate = "     Description: \"" + obj.Description + "\" => \"" + thesisObject.Description + "\"\n";
+								if (update == ""){
+									update = "Thesis updated.\n\n" + thisUpdate;
+								}else{
+									update += thisUpdate;
+								}
+							}
+							
+							if (update != ""){
+								alert(update);
+							}
+							
+							obj = thesisObject;
+						}
 					}
 				}
 			}else{
@@ -241,7 +400,8 @@ $(function() {
             'thesis-:id': 'onView',
             'new': 'onCreate',
             'edit-:id': 'onEdit',
-            'list': 'onList'
+            'list': 'onList',
+			'search': 'onSearch'
         },
 
        onHome: function() {
@@ -251,7 +411,6 @@ $(function() {
 
        onView: function(id) {
             contentView();          
-            console.log('thesis id', id);
 		    $.get('api/thesis/' + id, app.showView);
        },
 
@@ -269,7 +428,18 @@ $(function() {
        onList: function() {
             contentView();
             app.showList();
+			if (searched) {
+				app.loadSearchedThesis(searchedList);
+			}else{
+				app.loadAllThesis();
+			}
+       },
+
+       onSearch: function() {
+            contentView();
+            app.showList();
        }
+
 
     });
 	
