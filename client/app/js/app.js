@@ -241,12 +241,7 @@ $(function() {
 					linkClicked = 0;
 					$('.menu-create').removeClass('active');
 					$('.menu-list').removeClass('active');
-				} //else {
-					//linkClicked = 0;
-					//$('.menu-create').removeClass('active');
-					//$('.menu-list').addClass('active');
-					//app.deleteThesis($(this).attr('data-id'));
-				//}
+				}
 			});
         },
 		
@@ -255,7 +250,17 @@ $(function() {
 				type: 'DELETE',
 				url: '/api/thesis/' + id,
 				success: function(){
-					app.router.navigate('list', {trigger: true});
+					app.router.navigate('list', {trigger: false});
+					app.showList();
+					var thesisList = [];
+					$.get('/api/thesis', function(list){
+						for (var i = 0; i < list.length; i++){
+							if (list[i].Id != id) {
+								thesisList.push(list[i]);
+							}
+						}
+						app.displayLoadedList(thesisList);
+					});
 				}
 			});
 		},
